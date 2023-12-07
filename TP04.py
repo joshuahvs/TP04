@@ -7,7 +7,7 @@ class BarcodeGenerator:
 
         master.title("EAN-13")
         master.geometry("350x450")
-        master.resizable(False, False)
+        # master.resizable(False, False)
         self.homepage()
 
     def homepage(self):
@@ -49,18 +49,52 @@ class BarcodeGenerator:
     def create_barcode(self):
         self.canvas.create_rectangle(50, 50, 150, 150, outline="black", fill="white")
 
+    def display_barcode(self, binary):
+        for i in range(95):
+            if binary[i] == 1:
+                if self.special_position(i):
+                    self.special_rectange(i)
+                else:
+                    self.draw_rectangle(i)
+        
+    def draw_barcode(self):
+        self.canvas.create_rectangle(outline="black")
+
+    def special_position(self, number):
+        if number < 3:
+            return True
+        elif 46 < number < 50:
+            return True
+        elif 91< number <95:
+            return True
+        else:
+            return False
+
+    def draw_rectangle(self):
+        pass
+
+    def special_rectange(self):
+        pass
+
+    def draw_digit_code(self):
+        pass
+
+    def check_digit(self):
+        pass
+
 
 class EAN_13:
-    structure = {0: "LLLLLL RRRRRR",
-                 1: "LLGLGG RRRRRR",
-                 2: "LLGGLG RRRRRR",
-                 3: "LLGGGL RRRRRR",
-                 4: "LGLLGG RRRRRR",
-                 5: "LGGLLG RRRRRR",
-                 6: "LGGGLL RRRRRR",
-                 7: "LGLGLG RRRRRR",
-                 8: "LGLGGL RRRRRR",
-                 9: "LGGLGL RRRRRR"}
+    structure = {0: "LLLLLLRRRRRR",
+                 1: "LLGLGGRRRRRR",
+                 2: "LLGGLGRRRRRR",
+                 3: "LLGGGLRRRRRR",
+                 4: "LGLLGGRRRRRR",
+                 5: "LGGLLGRRRRRR",
+                 6: "LGGGLLRRRRRR",
+                 7: "LGLGLGRRRRRR",
+                 8: "LGLGGLRRRRRR",
+                 9: "LGGLGLRRRRRR"}
+    
     l_code = {0: "0001101",
               1: "0011001",
               2: "0010011",
@@ -91,11 +125,30 @@ class EAN_13:
               7: "1000100",
               8: "1001000",
               9: "1110100"}
+    
+    start_bits = "101"
+    middle_bits = "01010"
+    end_bits = "101"
+    
+    def bits(self, number):
+        structure_number = structure_number[number]
+        bits = ""
+        for i in structure_number:
+            if i == "L":
+                bits += self.l_code[number]
+            elif i == "G":
+                bits += self.g_code[number]
+            elif i == "R":
+                bits += self.r_code[number]  
+        return bits
+    
+
 
 
 
 def main():
     root = Tk()
+    root.resizable(False,False)
     BarcodeGenerator(root)
     root.mainloop()
 
