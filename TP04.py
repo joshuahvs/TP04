@@ -44,10 +44,15 @@ class BarcodeGenerator:
         if num_length != 12:
             messagebox.showerror('Wrong input!', 'The input must be a 12 digit number')
         else:
+
             self.create_barcode()
 
-    def create_barcode(self):
-        self.canvas.create_rectangle(50, 50, 150, 150, outline="black", fill="white")
+    def create_barcode(self, bits):
+        self.canvas.delete("all")
+        self.display_barcode(bits)
+        # self.draw_digit_code(number)
+        # self.check_digit(number)
+
 
     def display_barcode(self, binary):
         for i in range(95):
@@ -56,45 +61,53 @@ class BarcodeGenerator:
                     self.special_rectange(i)
                 else:
                     self.draw_rectangle(i)
-        
-    def draw_barcode(self):
-        self.canvas.create_rectangle(outline="black")
+            else:
+                pass
 
     def special_position(self, number):
         if number < 3:
             return True
         elif 46 < number < 50:
             return True
-        elif 91< number <95:
+        elif 91 < number < 95:
             return True
         else:
             return False
 
-    def draw_rectangle(self):
-        pass
+    def draw_rectangle(self, i):
+        self.canvas.create_line((75 + i * 4, 80, 80 + i * 4, 210), fill='black', width=0)
 
-    def special_rectange(self):
-        pass
+    def special_rectange(self, i):
+        self.canvas.create_line((100 + i * 5, 50, 110 + i * 5, 200), fill='blue', outline='blue', width=0)
 
-    def draw_digit_code(self):
-        pass
+    # def draw_digit_code(self):
+    #     pass
 
-    def check_digit(self):
-        pass
+    # def check_digit(self):
+    #     pass
 
 
-class EAN_13:
-    structure = {0: "LLLLLLRRRRRR",
-                 1: "LLGLGGRRRRRR",
-                 2: "LLGGLGRRRRRR",
-                 3: "LLGGGLRRRRRR",
-                 4: "LGLLGGRRRRRR",
-                 5: "LGGLLGRRRRRR",
-                 6: "LGGGLLRRRRRR",
-                 7: "LGLGLGRRRRRR",
-                 8: "LGLGGLRRRRRR",
-                 9: "LGGLGLRRRRRR"}
-    
+class Encoding:
+    structure_first = {0: "LLLLLL",
+                 1: "LLGLGG",
+                 2: "LLGGLG",
+                 3: "LLGGGL",
+                 4: "LGLLGG",
+                 5: "LGGLLG",
+                 6: "LGGGLL",
+                 7: "LGLGLG",
+                 8: "LGLGGL",
+                 9: "LGGLGL"}
+    structure_last = {0: "RRRRRR",
+                 1: "RRRRRR",
+                 2: "RRRRRR",
+                 3: "RRRRRR",
+                 4: "RRRRRR",
+                 5: "RRRRRR",
+                 6: "RRRRRR",
+                 7: "RRRRRR",
+                 8: "RRRRRR",
+                 9: "RRRRRR"}
     l_code = {0: "0001101",
               1: "0011001",
               2: "0010011",
@@ -130,20 +143,36 @@ class EAN_13:
     middle_bits = "01010"
     end_bits = "101"
     
-    def bits(self, number):
-        structure_number = structure_number[number]
-        bits = ""
-        for i in structure_number:
+    def bits_first(self, number):
+        structure = self.structure_first[number]
+        first_bits = ""
+        for i in structure:
             if i == "L":
                 bits += self.l_code[number]
             elif i == "G":
                 bits += self.g_code[number]
-            elif i == "R":
-                bits += self.r_code[number]  
-        return bits
+        return first_bits
     
+    def bits_first(self, number):
+        structure = self.structure_last[number]
+        last_bits = ""
+        for i in structure:
+            if i == "R":
+                bits += self.r_code[number]
+        return last_bits
+    
+class EAN_13(Encoding):
+    def __init__(self) -> None:
+        super().__init__()
 
-
+    def full_bits(self, number):
+        start_bits = super().start_bits
+        first_bits = super().bits_first(number)
+        middle_bits = super().middle_bits
+        last_bits = super().bits_last(number)
+        end_bits = super().end_bits
+        full_bits = start_bits + first_bits + middle_bits + last_bits + end_bits
+        return full_bits
 
 
 def main():

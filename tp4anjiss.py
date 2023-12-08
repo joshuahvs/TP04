@@ -23,11 +23,12 @@ class Display:
         self.number_entry = Entry(self.master)
         self.number_entry.pack()
 
-        self.button = Button(self.master, text= "CLICKME", command= self.check_input_file)
+        self.button = Button(self.master, text= "CLICK ME", command= self.check_input_file)
         self.button.pack()    
 
         self.canvas = Canvas(self.master, height="400", width="500", bg="white")
         self.canvas.pack()
+
 class Barcode(Display):
     def __init__(self, master):
         super().__init__(master)
@@ -37,8 +38,13 @@ class Barcode(Display):
         file_name = self.ps_file_entry.get()
         if file_name[-3:] != "eps":
             messagebox.showerror('Wrong input!', 'Please enter a valid postscript file')
-        else:
+        try:
+            if open(file_name, 'r'):
+                messagebox.showerror('Wrong input!', 'File already exists')
+        except:
             self.check_input_number()
+            self.canvas.update()
+            self.canvas.postscript(file = file_name, colormode = "color")
 
     def check_input_number(self):
         try:
@@ -149,13 +155,15 @@ class Barcode(Display):
         print(last_6)
 
         self.canvas.delete('barcode')
-        canvas_width = 350
+        canvas_width = 280
         canvas_height = 350
-        x_position = canvas_width * 0.1  # Start at 10% of canvas width
+        x_position = canvas_width * 0.25  # Start at 10% of canvas width
         y_start = canvas_height * 0.2  # Start at 20% of canvas height
         y_end = canvas_height * 0.8  # End at 80% of canvas height
 
-        self.canvas.create_text(x_position - 10, 295, text=first_digit, fill='black', font='Helvetica 24 bold', tag = 'barcode')
+        x_position_digit = canvas_width * 0.25
+
+        self.canvas.create_text(x_position - 8, 295, text=first_digit, fill='black', font='Helvetica 24 bold', tag = 'barcode')
         for bit in start:
             bit = int(bit)
             if bit == 1:
@@ -164,11 +172,21 @@ class Barcode(Display):
             # Move to the next x position regardless of the bit value
             x_position += canvas_width * 0.01  # Move by 1% of canvas width
 
-        for bit in enumerate(:
+        counter = 0
+        index = 0
+        for bit in first:
             bit = int(bit)
+            counter += 1
             if bit == 1:
                 self.canvas.create_rectangle(x_position, y_start, x_position + (canvas_width * 0.01), canvas_height*0.75, fill='black', outline='black', width=0, tag='barcode')
+            if counter % 7 == 0:
+                try:
+                    self.canvas.create_text(x_position_digit, 295, text=first_6[index], fill='black', font='Helvetica 24 bold', tag = 'barcode')
+                    index += 1
+                except IndexError:
+                    pass
             x_position += canvas_width * 0.01 
+            x_position_digit += canvas_width * 0.012
 
         for bit in middle:
             bit = int(bit)
@@ -176,11 +194,22 @@ class Barcode(Display):
                 self.canvas.create_rectangle(x_position, y_start, x_position + (canvas_width * 0.01), y_end, fill='blue', outline='blue', width=0, tag='barcode')
             x_position += canvas_width * 0.01 
         
+        counter = 0
+        index = 0
+        x_position_digit -= 10
         for bit in last:
             bit = int(bit)
+            counter += 1
             if bit == 1:
                 self.canvas.create_rectangle(x_position, y_start, x_position + (canvas_width * 0.01), canvas_height*0.75, fill='black', outline='black', width=0, tag='barcode')
+            if counter % 7 == 0:
+                try:
+                    self.canvas.create_text(x_position_digit, 295, text=first_6[index], fill='black', font='Helvetica 24 bold', tag = 'barcode')
+                    index += 1
+                except IndexError:
+                    pass
             x_position += canvas_width * 0.01 
+            x_position_digit += canvas_width * 0.012
         
         for bit in end:
             bit = int(bit)
