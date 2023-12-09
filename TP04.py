@@ -35,20 +35,21 @@ class Barcode(Display):
     # Inisiasi awal
     def __init__(self, master):
         super().__init__(master)
+
     # Fungsi yang akan menvalidasi input file
     def check_input_file(self, event):
         file_name = self.ps_file_entry.get()
         if file_name[-4:] != ".eps":
             messagebox.showerror('Wrong input!', 'Please enter a valid postscript file')
-        try:
-            if open(file_name, 'r'):
-                messagebox.showerror('Wrong input!', 'File already exists')
-        except:
-            self.check_input_number()
-            self.canvas.update()
-            self.canvas.postscript(file = file_name, colormode = "color")
+        else:
+            try:
+                if open(file_name, 'r'):
+                    messagebox.showerror('Wrong input!', 'File already exists')
+            except:
+                self.check_input_number(file_name)
+
     # Fungsi yang akan memvalidasi input angka
-    def check_input_number(self):
+    def check_input_number(self,file_name):
         try:
             num = int(self.number_entry.get())
         except ValueError:
@@ -56,7 +57,11 @@ class Barcode(Display):
         num_length = len(str(num))
         if num_length != 12:
             messagebox.showerror('Wrong input!', 'The input must be a 12 digit number')
-        self.check_digit(num)
+        else:
+            self.check_digit(num)
+            self.canvas.update()
+            self.canvas.postscript(file = file_name, colormode = "color")
+            
     # Fungsi untuk check digit
     def check_digit(self, number):
         digits = [int(digit) for digit in str(number)] # konversi digit jadi list str
