@@ -57,7 +57,7 @@ class Barcode(Display):
         if num_length != 12:
             messagebox.showerror('Wrong input!', 'The input must be a 12 digit number')
         self.check_digit(num)
-    # Fungis untuk check digit
+    # Fungsi untuk check digit
     def check_digit(self, number):
         digits = [int(digit) for digit in str(number)] # konversi digit jadi list str
         checksum = 0
