@@ -7,7 +7,6 @@ class Display:
 
         master.title("EAN-13")
         master.geometry("400x500")
-        # master.resizable(False, False)
         self.homepage()
 
     def homepage(self):
@@ -21,20 +20,20 @@ class Display:
         number_label.pack()
 
         self.number_entry = Entry(self.master)
+        self.number_entry.bind("<Return>", self.check_input_file)
         self.number_entry.pack()
-
-        self.button = Button(self.master, text= "CLICK ME", command= self.check_input_file)
-        self.button.pack()    
 
         self.canvas = Canvas(self.master, height="400", width="500", bg="white")
         self.canvas.pack()
 
+        # self.save_as_png = Button(self.master, text='Click to save as PNG')
+        # self.save_as_png.pack()
+
 class Barcode(Display):
     def __init__(self, master):
         super().__init__(master)
-        # self.number_entry.bind("<Return>", self.check_input_file)
 
-    def check_input_file(self):
+    def check_input_file(self, event):
         file_name = self.ps_file_entry.get()
         if file_name[-3:] != "eps":
             messagebox.showerror('Wrong input!', 'Please enter a valid postscript file')
@@ -57,7 +56,7 @@ class Barcode(Display):
         self.check_digit(num)
 
     def check_digit(self, number):
-        # Convert the number to a list of integers
+        # konversi digit jadi list str
         digits = [int(digit) for digit in str(number)]
         # Initialize checksum
         checksum = 0
