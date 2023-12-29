@@ -1,5 +1,8 @@
 from tkinter import *
-from tkinter import messagebox # import tkinter dan juga messagebox
+from tkinter import messagebox # import tkinter dan juga messagebox 
+
+from datetime import datetime #untuk fitur bonus
+
 
 # Class untuk tampilan awal
 class Display:
@@ -25,6 +28,10 @@ class Display:
         self.number_entry = Entry(self.master)
         self.number_entry.bind("<Return>", self.check_input_file)
         self.number_entry.pack()
+
+        history_button = Button(self.master, text="View History", command=self.display_history)
+        history_button.pack()
+
         # Canvas untuk menggambarkan barcodenya
         self.canvas = Canvas(self.master, height="400", width="500", bg="white")
         self.canvas.pack()
@@ -35,6 +42,7 @@ class Barcode(Display):
     # Inisiasi awal
     def __init__(self, master):
         super().__init__(master)
+        self.barcode_history = []  # List untuk menyimpan history barcode (fitur bonus)
 
     # Fungsi yang akan menvalidasi input file
     def check_input_file(self, event):
@@ -61,7 +69,17 @@ class Barcode(Display):
             self.check_digit(num)
             self.canvas.update()
             self.canvas.postscript(file = file_name, colormode = "color")
-            
+
+            check_digit = self.check_digit(num)
+            # Menambahkan daftar histori barcode
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.barcode_history.append({
+            'number': num,
+            'filename': file_name,
+            'check_digit': check_digit,
+            'timestamp': timestamp
+        })
+
     # Fungsi untuk check digit
     def check_digit(self, number):
         digits = [int(digit) for digit in str(number)] # konversi digit jadi list str
@@ -77,15 +95,26 @@ class Barcode(Display):
         self.display_check_digit(check_digit)
         self.display()
         self.bits(full_number)
+        return check_digit
+
+    # Fungsi untuk menampilakan histori barcode yang tergenerate (Fitur Bonus)
+    def display_history(self):
+        history_window = Toplevel(self.master)
+        history_window.title("Barcode History")
+        for barcode_info in self.barcode_history:
+            label_text = f"Barcode: {barcode_info['number']} | Check Digit: {barcode_info['check_digit']} | Filename: {barcode_info['filename']} | Time: {barcode_info['timestamp']}"
+            Label(history_window, text=label_text).pack()
     
     # Fungsi yang menampilkan Check digitnya
     def  display_check_digit(self, check_digit):
         self.canvas.delete('checkdigit')
         self.canvas.create_text(200, 340, fill='orange',text=f'Check Digit: {check_digit}', font='Helvetica 24 bold', tag="checkdigit")
+
     # Fungsi yang menampilkan untuk menampilkan teks "EAN-13 Barcode:"
     def display(self):
         self.canvas.delete('textawal')
         self.canvas.create_text(200, 35, text="EAN-13 Barcode: ", fill='black', font='Helvetica 24 bold', tag = 'textawal')
+
     # Fungsi untuk encoding angka yang diinput user menjadi bits
     def bits(self, number):
         #Dictionary struktur, untuk proses encodingnya
@@ -164,7 +193,6 @@ class Barcode(Display):
         x_position = canvas_width * 0.25  # posisi mulai 25% dari width canvas
         y_start = canvas_height * 0.2  # Posisi mulai 20% dari height canvas
         y_end = canvas_height * 0.8  # Posisi berhenti 80% of dari tinggi canvas
-
         x_position_digit = canvas_width * 0.27 # Posisi khusus untuk angkanya
         
         self.canvas.create_text(x_position - 8, 295, text=first_digit, fill='black', font='Helvetica 24 bold', tag = 'barcode')
@@ -194,6 +222,7 @@ class Barcode(Display):
                     pass
             x_position += canvas_width * 0.01 
             x_position_digit += canvas_width * 0.01
+
         # Mengiterasi untuk bagian tengah
         for bit in middle:
             bit = int(bit)
@@ -225,6 +254,7 @@ class Barcode(Display):
             if bit == 1:
                 self.canvas.create_rectangle(x_position, y_start, x_position + (canvas_width * 0.01), y_end, fill='blue', outline='blue', width=0, tag='barcode')
             x_position += canvas_width * 0.01 
+
 
 # Menjalankan programnya dan membuat windownya tidak resizable
 def main():
